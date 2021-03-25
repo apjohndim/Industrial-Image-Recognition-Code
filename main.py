@@ -27,13 +27,13 @@ import tensorflow as tf
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import average_precision_score
 
-sys.path.insert(1, 'C:\\Users\\User\\ZZZ. INDUSTRY\\rEPRODUCTION cODE')
+sys.path.insert(1, 'E:\\ΤΑ ΕΓΓΡΑΦΑ ΜΟΥ\\PYTHON CODES FOR EXP & PUBS\\ZZZ. INDUSTRY\\rEPRODUCTION cODE')
 import pandas as pd
 import data_loader
 import model_maker
 
 from data_loader import load_casting, load_defloc, load_mag, load_tech, load_br, load_el
-from model_maker import make_lvgg, make_vgg, make_xception
+from model_maker import make_lvgg, make_vgg, make_xception, make_resnet, make_mobile, make_dense, make_eff
 from sklearn.metrics import f1_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import precision_score
@@ -86,7 +86,17 @@ def train(epochs,batch_size, model, in_shape, tune, classes, n_split):
             model3 = make_xception(in_shape, tune, classes)
         elif model == 'vgg':
             model3 = make_vgg(in_shape, 20, classes)
-       
+        elif model == 'inception':
+            model3 = make_xception(in_shape, tune, classes)
+        elif model == 'resnet':
+            model3 = make_resnet(in_shape, 20, classes)      
+        elif model == 'mobile':
+            model3 = make_mobile(in_shape, tune, classes)
+        elif model == 'dense':
+            model3 = make_dense(in_shape, 20, classes)    
+        elif model == 'efficient':
+            model3 = make_eff(in_shape, 20, classes)    
+
         
         if omega == 1:
            model3.summary()
@@ -392,12 +402,11 @@ def get_img_array(img_path, size):
 #%% TRAIN - OBTAIN RESULTS
 
   # GIVE PATH TO IMAGES
-# path = 'E:\\Data (Biomarkers phase 2)\\NVLES\\'
-#path = 'E:\DATA INDUSTRIAL RECOGNITION\Magnetice Tile Defece'
-path = 'E:\\DATA INDUSTRIAL RECOGNITION\\casting product image data for quality inspection'
+#path = 'E:\\ΤΑ ΕΓΓΡΑΦΑ ΜΟΥ\\PHD DATASETS\\DATA INDUSTRIAL RECOGNITION\\Magnetice Tile Defece'
+#path = 'E:\\ΤΑ ΕΓΓΡΑΦΑ ΜΟΥ\\PHD DATASETS\\DATA INDUSTRIAL RECOGNITION\\casting product image data for quality inspection'
 #path = 'E:\\DATA INDUSTRIAL RECOGNITION\\Defects location for metal surface'
 #path = 'E:\\DATA INDUSTRIAL RECOGNITION\\MVTec ITODD\\scenes\\'
-#path = 'E:\\DATA INDUSTRIAL RECOGNITION\\Bridge_Crack_Image\\DBCC_Training_Data_Set\\'
+path = 'C:\\Users\\User\\zzz_industrial_data\\Bridge_Crack_Image\\DBCC_Training_Data_Set\\'
 #path = 'E:\\DATA INDUSTRIAL RECOGNITION\\httpsgithub.comzae-bayernelpv-dataset\\elpv-dataset-master\\images\\'
 
 
@@ -405,13 +414,12 @@ path = 'E:\\DATA INDUSTRIAL RECOGNITION\\casting product image data for quality 
   # LOAD IMAGES WITH DIFERRENT FUNCTIONS
 
 #data, labels, labeltemp, image = load_defloc(path)
-data, labels, labeltemp, image = load_casting(path)
+#data, labels, labeltemp, image = load_casting(path)
 #data, labels, labeltemp, image = load_mag(path)
 #data, labels, labeltemp, image = load_tech(path)
-#data, labels, labeltemp, image = load_br(path)
+data, labels, labeltemp, image = load_br(path)
 #data, labels, labeltemp, image = load_el(path)
 
-# data, labels, labeltemp, image = load_MPIP(path)
 
 
 # #
@@ -430,7 +438,9 @@ plt.show()
 #in_shape = (100,100,3) # casting
 # in_shape = (32,32,3) # casting
 #in_shape = (32,32,3) # el
-in_shape = (100,100,3) # el
+#in_shape = (100,100,3) # el
+in_shape = (72,72,3) # for Exception
+in_shape = (75,75,3) # for InceptionV3
 
 
 tune = 1 # SET: 1 FOR TRAINING SCRATCH, 0 FOR OFF THE SHELF, INTEGER FOR TRAINABLE LAYERS (FROM TUNE AND DOWN, THE LAYERS WILL BE TRAINABLE)
@@ -447,7 +457,7 @@ n_split = 10
 #%% FIT THE MODEL TO THE DATA (FOR PHASE 2)
 
 
-model = 'vgg'
+model = 'xception'
 model3, predictions_all,predictions_all_num,test_labels,labels, auc, conf_final,final_score,mean_f1,precision_final,recall_final,average_precision,cnf_matrix,cnf_img,history = train(epochs,batch_size, model, in_shape, tune, classes, n_split)
 
 

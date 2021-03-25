@@ -55,7 +55,8 @@ def load_br (path):
     for imagePath in imagePaths: #load, resize, normalize, etc
         image = cv2.imread(imagePath)
         #image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        image = cv2.resize(image, (32, 32))/image.max()
+        #image = cv2.resize(image, (32, 32))/image.max()
+        image = cv2.resize(image, (72, 72))/image.max()
         data.append(image)
         # extract the class label from the image path and update the labels list
         label = imagePath.split(os.path.sep)[-2]
