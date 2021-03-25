@@ -1,15 +1,9 @@
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
-# matplotlib inline
-from sklearn.preprocessing import LabelBinarizer
-from sklearn.model_selection import train_test_split
 from imutils import paths
 import numpy as np
-import random
 import cv2
 import os
-import time   # time1 = time.time(); print('Time taken: {:.1f} seconds'.format(time.time() - time1))
-import warnings
 import sys
 from PIL import Image 
 from sklearn.model_selection import KFold
@@ -18,7 +12,6 @@ from sklearn.metrics import auc
 from imutils import paths
 import numpy as np
 import os
-import warnings
 from keras.utils import to_categorical
 from keras.preprocessing import image
 from keras.utils import to_categorical
@@ -28,9 +21,6 @@ from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import average_precision_score
 
 sys.path.insert(1, 'E:\\ΤΑ ΕΓΓΡΑΦΑ ΜΟΥ\\PYTHON CODES FOR EXP & PUBS\\ZZZ. INDUSTRY\\rEPRODUCTION cODE')
-import pandas as pd
-import data_loader
-import model_maker
 
 from data_loader import load_casting, load_defloc, load_mag, load_tech, load_br, load_el
 from model_maker import make_lvgg, make_vgg, make_xception, make_resnet, make_mobile, make_dense, make_eff
@@ -39,10 +29,6 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
-import cv2
-
-import seaborn as sns
-import math
 
 def gaussian (img_array):
 
@@ -327,65 +313,7 @@ def plot_confusion_matrix(cm, classes,
 from IPython.display import Image
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-
-
 import cv2
-
-def make_gradcam_heatmap(
-    img_array, model, last_conv_layer_name, classifier_layer_names
-):
-    
-    
-    
-    # First, we create a model that maps the input image to the activations
-    # of the last conv layer
-    last_conv_layer = model.get_layer(last_conv_layer_name)
-
-    last_conv_layer_model = keras.Model(model.inputs, last_conv_layer.output)
-
-
-
-    # Second, we create a model that maps the activations of the last conv
-    # layer to the final class predictions
-    classifier_input = keras.Input(shape=last_conv_layer.output.shape[1:])
-    x = classifier_input
-    for layer_name in classifier_layer_names:
-        x = model.get_layer(layer_name)(x)
-    classifier_model = keras.Model(classifier_input, x)
-
-    # Then, we compute the gradient of the top predicted class for our input image
-    # with respect to the activations of the last conv layer
-    with tf.GradientTape() as tape:
-        # Compute activations of the last conv layer and make the tape watch it
-        last_conv_layer_output = last_conv_layer_model(img_array)
-        tape.watch(last_conv_layer_output)
-        # Compute class predictions
-        preds = classifier_model(last_conv_layer_output)
-        top_pred_index = tf.argmax(preds[0])
-        top_class_channel = preds[:, top_pred_index]
-
-    # This is the gradient of the top predicted class with regard to
-    # the output feature map of the last conv layer
-    grads = tape.gradient(top_class_channel, last_conv_layer_output)
-
-    # This is a vector where each entry is the mean intensity of the gradient
-    # over a specific feature map channel
-    pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
-
-    # We multiply each channel in the feature map array
-    # by "how important this channel is" with regard to the top predicted class
-    last_conv_layer_output = last_conv_layer_output.numpy()[0]
-    pooled_grads = pooled_grads.numpy()
-    for i in range(pooled_grads.shape[-1]):
-        last_conv_layer_output[:, :, i] *= pooled_grads[i]
-
-    # The channel-wise mean of the resulting feature map
-    # is our heatmap of class activation
-    heatmap = np.mean(last_conv_layer_output, axis=-1)
-
-    # For visualization purpose, we will also normalize the heatmap between 0 & 1
-    heatmap = np.maximum(heatmap, 0) / np.max(heatmap)
-    return heatmap
 
 
 def get_img_array(img_path, size):
@@ -462,16 +390,6 @@ model3, predictions_all,predictions_all_num,test_labels,labels, auc, conf_final,
 
 
 
-
-
-
-
-
-
-
-
-
-
 #%%
 # SAVE AND LOAD MODEL
 
@@ -482,93 +400,6 @@ model3, predictions_all,predictions_all_num,test_labels,labels, auc, conf_final,
 # model.save('C:\\Users\\User\\ZZZ. INDUSTRY\\tmp.h5')
 
 # model = tf.keras.models.load_model('C:\\Users\\User\\ZZZ. INDUSTRY\\tmp.h5')
-
-
-
-# #%% 
-
-# ''' GRAD CAM'''
-
-
-# def Grad_pics (path, save_path, model,w,h):
-#     # name = 'ISIC_0015984.jpg'
-#     # imagePath = 'E:\\Data (Biomarkers)\\SKIN\\nv\\{}'.format(name)
-#     import os
-#     from imutils import paths
-    
-#     imagePaths = sorted(list(paths.list_images(path)))
-#     preprocess_input = keras.applications.mobilenet.preprocess_input
-    
-#     for imagePath in imagePaths[:20]:
-#         img_array = preprocess_input(get_img_array(imagePath, size=(h, w)))
-        
-#         name = os.path.splitext(os.path.basename(imagePath))[0]
-#         ext = os.path.splitext(os.path.basename(imagePath))[1]
-        
-#         last_conv_layer_name = model.layers[19].name
-        
-#         classifier_layer_names = [model.layers[20].name,model.layers[21].name, model.layers[22].name, model.layers[23].name, model.layers[24].name ]
-        
-        
-#         heatmap = make_gradcam_heatmap(
-#             img_array, model, last_conv_layer_name, classifier_layer_names)
-        
-        
-#         heatmap= np.uint8(255 * heatmap)
-#         jet = cm.get_cmap("coolwarm")
-#         #jet = cm.get_cmap("binary")
-#        # jet = cm.get_cmap("winter")
-        
-#         # We use RGB values of the colormap
-#         jet_colors = jet(np.arange(256))[:, :3]
-#         jet_heatmap = jet_colors[heatmap]
-        
-        
-#         # img = cv2.imread(imagePath)
-#         # img = cv2.resize(img, (w,h))
-#         # We create an image with RGB colorized heatmap
-        
-#         big_heatmap = cv2.resize(jet_heatmap, dsize=(w, h), 
-#                                  interpolation=cv2.INTER_CUBIC)
-        
-#         big_heatmap = keras.preprocessing.image.img_to_array(big_heatmap)
-        
-#         jet_heatmap = keras.preprocessing.image.array_to_img(jet_heatmap)
-        
-        
-#         jet_heatmap = jet_heatmap.resize((img_array.shape[2], img_array.shape[1]))
-#         jet_heatmap = keras.preprocessing.image.img_to_array(jet_heatmap)
-        
-#         # Superimpose the heatmap on original image
-#         # superimposed_img = big_heatmap * 200 + img
-#         superimposed_img = img_array[0,:,:,:] + (big_heatmap*2)
-#         superimposed_img = keras.preprocessing.image.array_to_img(superimposed_img)
-        
-#         # superimposed_img = keras.preprocessing.image.array_to_img(img_array[0,:,:,:])
-        
-#         # Save the superimposed image
-#         save_path2 = save_path+name+ext
-#         superimposed_img.save(save_path2)
-        
-#         # Display Grad CAM
-#         #from IPython.display import Image
-#         #display(Image(save_path))
-
-
-# #%%
-
-# h = in_shape[0]
-# w = in_shape[1]
-
-# path = 'E:\\DATA INDUSTRIAL RECOGNITION\\casting product image data for quality inspection\\ok\\'
-# save_path = 'C:\\Users\\User\\ZZZ. INDUSTRY\\FEATURES\\'
-
-
-# #%%
-# Grad_pics (path, save_path, model,w,h)
-
-
-# #%%
 
 
 # ''' FEATURE MAPS'''
