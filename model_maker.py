@@ -81,7 +81,7 @@ def make_lvgg (in_shape, tune, classes):
     x1 = layer_dict['block5_conv3'].output 
     x1= tf.keras.layers.GlobalAveragePooling2D()(x1)
     #x1 = Flatten()(x1)
-    x = tf.keras.layers.concatenate([x1, early4, early3], axis=-1)  
+    x = tf.keras.layers.concatenate([x1, early2, early4, early3], axis=-1)  
     
     #x = Flatten()(x)
     #x = Dense(256, activation='relu')(x)
